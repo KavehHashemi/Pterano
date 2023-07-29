@@ -1,0 +1,26 @@
+[
+    {
+        "command": "start",
+        "description": "شروع"
+    },
+    {
+        "command": "help",
+        "description": "راهنما"
+    },
+    {
+        "command": "products",
+        "description": "محصولات"
+    },
+    {
+        "command": "custom",
+        "description": "کاستوم"
+    },
+    {
+        "command": "special",
+        "description": "ویژه"
+    },
+    {
+        "command": "caption",
+        "description": "کپشن"
+    }
+]
