@@ -10,34 +10,60 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export class QandA {
-  private model;
-  private text;
-  private textSplitter;
-  private docs;
-  private vectorStore;
+  // private model: ChatOpenAI;
+  // private text: string;
+  // private textSplitter: RecursiveCharacterTextSplitter;
+  // private docs;
+  // private vectorStore;
+  public code: number;
   private chain;
 
-  public constructor() {
-    this.model = new ChatOpenAI({ temperature: 0 });
-    this.text = fs.readFileSync("about.txt", "utf8");
-    this.textSplitter = new RecursiveCharacterTextSplitter({
+  private constructor(
+    // model: ChatOpenAI,
+    // text: string,
+    // textSplitter: RecursiveCharacterTextSplitter,
+    // docs: any,
+    // vectorStore: HNSWLib,
+    chain: ConversationalRetrievalQAChain
+  ) {
+    // this.model = model;
+    // this.text = text;
+    // this.textSplitter = textSplitter;
+    // this.docs = docs;
+    // this.vectorStore = vectorStore;
+    this.code = Date.now();
+    this.chain = chain;
+  }
+
+  public static build = async () => {
+    const buildModel = new ChatOpenAI({ temperature: 0 });
+    const buildText = fs.readFileSync("about.txt", "utf8");
+    const buildTextSplitter = new RecursiveCharacterTextSplitter({
       chunkSize: 1000,
     });
-    this.docs = await this.textSplitter.createDocuments([this.text]);
-    this.vectorStore = await HNSWLib.fromDocuments(
-      this.docs,
+    const buildDocs = await buildTextSplitter.createDocuments([buildText]);
+    const buildVectorStore = await HNSWLib.fromDocuments(
+      buildDocs,
       new OpenAIEmbeddings()
     );
-    this.chain = ConversationalRetrievalQAChain.fromLLM(
-      this.model,
-      this.vectorStore.asRetriever(),
+    const buildChain = ConversationalRetrievalQAChain.fromLLM(
+      buildModel,
+      buildVectorStore.asRetriever(),
       {
         memory: new BufferMemory({
           memoryKey: "chat_history",
         }),
       }
     );
-  }
+    return new QandA(
+      // buildModel,
+      // buildText,
+      // buildTextSplitter,
+      // buildDocs,
+      // buildVectorStore,
+      buildChain
+    );
+  };
 
   public ask = async (question: string) => {
     return await this.chain.call({ question });

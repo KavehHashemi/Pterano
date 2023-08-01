@@ -2,7 +2,7 @@ import { Bot, InlineKeyboard, Keyboard, Context } from "grammy";
 import { I18n, I18nFlavor } from "@grammyjs/i18n";
 import dotenv from "dotenv";
 import commands from "./commands.json";
-import { QA } from "./qa";
+import { QandA } from "./qa";
 
 type MyContext = Context & I18nFlavor;
 
@@ -20,6 +20,9 @@ const i18n = new I18n<MyContext>({
   },
 });
 bot.use(i18n);
+
+// const QA = Promise.resolve(QandA.build());
+const QA = QandA.build();
 
 bot.api.setMyCommands(commands);
 
@@ -61,7 +64,8 @@ bot.command("start", (ctx) => ctx.reply("Welcome! Up and running."));
 
 bot.on("message:text", async (ctx) => {
   let answer = "";
-  answer = (await QA(ctx.message.text)).text;
+  console.log((await QA).code);
+  answer = (await (await QA).ask(ctx.message.text)).text;
   try {
     ctx.reply(answer);
   } catch (error) {
@@ -70,7 +74,7 @@ bot.on("message:text", async (ctx) => {
 });
 
 bot.start({
-  onStart: (u) => {
+  onStart: async (u) => {
     u.username;
   },
 });
