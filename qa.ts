@@ -10,27 +10,38 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export class QandA {
+  private model;
+  private text;
+  private textSplitter;
+  private docs;
+  private vectorStore;
+  private chain;
+
   public constructor() {
-    model = new ChatOpenAI({ temperature: 0 });
-    text = fs.readFileSync("about.txt", "utf8");
-    textSplitter = new RecursiveCharacterTextSplitter({ chunkSize: 1000 });
-    docs = await this.textSplitter.createDocuments([this.text]);
-    vectorStore = await HNSWLib.fromDocuments(
+    this.model = new ChatOpenAI({ temperature: 0 });
+    this.text = fs.readFileSync("about.txt", "utf8");
+    this.textSplitter = new RecursiveCharacterTextSplitter({
+      chunkSize: 1000,
+    });
+    this.docs = await this.textSplitter.createDocuments([this.text]);
+    this.vectorStore = await HNSWLib.fromDocuments(
       this.docs,
       new OpenAIEmbeddings()
     );
-    chain = ConversationalRetrievalQAChain.fromLLM(
+    this.chain = ConversationalRetrievalQAChain.fromLLM(
       this.model,
       this.vectorStore.asRetriever(),
       {
         memory: new BufferMemory({
-          memoryKey: "chat_history", // Must be set to "chat_history"
+          memoryKey: "chat_history",
         }),
       }
     );
   }
 
-  res = await this.chain.call({ question });
+  public ask = async (question: string) => {
+    return await this.chain.call({ question });
+  };
 }
 
 // export const QA = async (question: string) => {
@@ -69,5 +80,3 @@ export class QandA {
 //   // });
 //   // console.log(finalQuestion);
 // };
-
-// run();
